@@ -21,4 +21,11 @@ export const customTheme: CustomFlowbiteTheme = createTheme({
       accent: "fill-accent",
     },
   },
+  tabs: {
+    tablist: {
+      tabitem: {
+        base: twMerge(theme.tabs.tablist.tabitem.base, "cursor-pointer"),
+      },
+    },
+  },
 });

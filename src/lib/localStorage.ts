@@ -1,14 +1,14 @@
 import {
   AppData,
-  College,
-  Semester,
-  Class,
+  AppSettings,
   Assignment,
+  Class,
+  College,
+  CreateAssignmentData,
+  CreateClassData,
   CreateCollegeData,
   CreateSemesterData,
-  CreateClassData,
-  CreateAssignmentData,
-  AppSettings,
+  Semester,
 } from "@/types/app/app";
 
 export const STORAGE_KEY = "college-tracker-data";

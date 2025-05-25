@@ -1,28 +1,28 @@
 "use client";
 
 import {
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
   Label,
-  TextInput,
-  Textarea,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Select,
   Spinner,
+  Textarea,
+  TextInput,
 } from "flowbite-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  CreateAssignmentData,
   Assignment,
-  AssignmentType,
   AssignmentStatus,
+  AssignmentType,
+  CreateAssignmentData,
   Priority,
 } from "@/types/app/app";
 import {
-  ASSIGNMENT_TYPE_OPTIONS,
   ASSIGNMENT_STATUS_OPTIONS,
+  ASSIGNMENT_TYPE_OPTIONS,
   PRIORITY_OPTIONS,
 } from "@/data/constants/class";
 

@@ -1,18 +1,18 @@
 import {
   AppData,
-  College,
-  Semester,
-  Class,
+  AppSettings,
   Assignment,
+  Class,
+  College,
+  CreateAssignmentData,
+  CreateClassData,
   CreateCollegeData,
   CreateSemesterData,
-  CreateClassData,
-  CreateAssignmentData,
+  Semester,
+  UpdateAssignmentData,
+  UpdateClassData,
   UpdateCollegeData,
   UpdateSemesterData,
-  UpdateClassData,
-  UpdateAssignmentData,
-  AppSettings,
 } from "@/types/app/app";
 import * as browserStorage from "./localStorage";
 

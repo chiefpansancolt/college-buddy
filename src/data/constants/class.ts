@@ -1,7 +1,7 @@
 import {
-  ClassStatus,
-  AssignmentType,
   AssignmentStatus,
+  AssignmentType,
+  ClassStatus,
   Priority,
 } from "@/types/app/app";
 

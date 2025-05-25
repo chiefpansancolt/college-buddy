@@ -22,7 +22,6 @@ import {
   HiPencil,
   HiTrash,
   HiClock,
-  HiLocationMarker,
   HiUser,
   HiMail,
   HiExclamationCircle,
@@ -51,8 +50,7 @@ import {
   deleteAssignment,
 } from "@/lib/storage";
 import { successToast, errorToast } from "@/lib/notifications";
-import ClassFormModal from "@/components/modals/ClassFormModal";
-import AssignmentFormModal from "@/components/modals/AssignmentFormModal";
+import { ClassFormModal, AssignmentFormModal } from "@/components/modals";
 import { DAYS_OF_WEEK } from "@/data/constants/class";
 
 interface SemesterDetailPageProps {
@@ -127,7 +125,7 @@ export default function SemesterDetailPage({
         });
       }
 
-      await loadData(); // Refresh data
+      await loadData();
       setShowClassModal(false);
       successToast({
         message: `${newClass.name} has been created successfully!${
@@ -164,7 +162,7 @@ export default function SemesterDetailPage({
         classData,
       );
       if (success) {
-        await loadData(); // Refresh data
+        await loadData();
         setShowClassModal(false);
         setEditingClass(null);
         successToast({
@@ -192,7 +190,7 @@ export default function SemesterDetailPage({
 
     try {
       await deleteClass(collegeId, semesterId, classItem.id);
-      await loadData(); // Refresh data
+      await loadData();
       successToast({
         message: `${classItem.name} has been deleted successfully!`,
       });
@@ -215,7 +213,7 @@ export default function SemesterDetailPage({
         selectedClassId,
         assignmentData,
       );
-      await loadData(); // Refresh data
+      await loadData();
       setShowAssignmentModal(false);
       setSelectedClassId("");
       successToast({
@@ -250,7 +248,7 @@ export default function SemesterDetailPage({
         assignmentData,
       );
       if (success) {
-        await loadData(); // Refresh data
+        await loadData();
         setShowAssignmentModal(false);
         setEditingAssignment(null);
         setSelectedClassId("");
@@ -280,7 +278,7 @@ export default function SemesterDetailPage({
         assignment.classId,
         assignment.id,
       );
-      await loadData(); // Refresh data
+      await loadData();
       successToast({
         message: `${assignment.title} has been deleted successfully!`,
       });
@@ -422,7 +420,6 @@ export default function SemesterDetailPage({
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
       <div className="border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="py-6">
@@ -782,7 +779,6 @@ export default function SemesterDetailPage({
         </Tabs>
       </div>
 
-      {/* Class Form Modal */}
       <ClassFormModal
         isOpen={showClassModal}
         onClose={closeClassModal}
@@ -792,7 +788,6 @@ export default function SemesterDetailPage({
         isLoading={isLoading}
       />
 
-      {/* Assignment Form Modal */}
       <AssignmentFormModal
         isOpen={showAssignmentModal}
         onClose={closeAssignmentModal}

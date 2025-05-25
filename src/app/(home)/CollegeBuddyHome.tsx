@@ -1,18 +1,6 @@
 "use client";
 
-import {
-  Button,
-  Card,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Label,
-  TextInput,
-  DarkThemeToggle,
-  Badge,
-  Spinner,
-} from "flowbite-react";
+import { Button, Card, DarkThemeToggle, Badge } from "flowbite-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -22,7 +10,6 @@ import {
   HiClipboardList,
   HiCalendar,
   HiTrendingUp,
-  HiUsers,
   HiLocationMarker,
   HiGlobeAlt,
   HiArrowRight,
@@ -30,19 +17,13 @@ import {
 import { College, CreateCollegeData } from "@/types/app/app";
 import { getColleges, createCollege } from "@/lib/storage";
 import { successToast, errorToast } from "@/lib/notifications";
+import { CollegeFormModal } from "@/components/modals";
 
 export default function CollegeBuddyHome() {
   const router = useRouter();
   const [colleges, setColleges] = useState<College[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<CreateCollegeData>({
-    name: "",
-    abbreviation: "",
-    website: "",
-    location: "",
-    overallGPA: undefined,
-  });
 
   useEffect(() => {
     loadColleges();
@@ -57,17 +38,7 @@ export default function CollegeBuddyHome() {
     }
   };
 
-  const handleInputChange = (
-    field: keyof CreateCollegeData,
-    value: string | number,
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleCreateCollege = async () => {
+  const handleCreateCollege = async (formData: CreateCollegeData) => {
     if (!formData.name.trim()) {
       errorToast({ message: "College name is required" });
       return;
@@ -78,13 +49,6 @@ export default function CollegeBuddyHome() {
       const newCollege = await createCollege(formData);
       setColleges((prev) => [...prev, newCollege]);
       setShowCreateModal(false);
-      setFormData({
-        name: "",
-        abbreviation: "",
-        website: "",
-        location: "",
-        overallGPA: undefined,
-      });
       successToast({
         message: `${newCollege.name} has been created successfully!`,
       });
@@ -174,7 +138,6 @@ export default function CollegeBuddyHome() {
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
       <div className="border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
@@ -206,7 +169,6 @@ export default function CollegeBuddyHome() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Welcome Section */}
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
             Welcome to Your Academic Dashboard
@@ -218,7 +180,6 @@ export default function CollegeBuddyHome() {
           </p>
         </div>
 
-        {/* Stats Cards */}
         <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {statsData.map((stat, index) => (
             <Card key={index} className="text-center">
@@ -237,7 +198,6 @@ export default function CollegeBuddyHome() {
           ))}
         </div>
 
-        {/* Features Grid */}
         <div className="mb-12">
           <h3 className="mb-8 text-center text-2xl font-bold text-gray-900 dark:text-white">
             Everything You Need to Succeed
@@ -263,7 +223,6 @@ export default function CollegeBuddyHome() {
           </div>
         </div>
 
-        {/* Colleges Section */}
         <div className="mb-12">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -316,9 +275,11 @@ export default function CollegeBuddyHome() {
                         {college.name}
                       </h5>
                       {college.abbreviation && (
-                        <Badge color="blue" size="sm">
-                          {college.abbreviation}
-                        </Badge>
+                        <div className="mt-1 inline-flex">
+                          <Badge color="blue" size="sm">
+                            {college.abbreviation}
+                          </Badge>
+                        </div>
                       )}
                     </div>
                     <HiArrowRight className="h-5 w-5 text-gray-400" />
@@ -380,115 +341,12 @@ export default function CollegeBuddyHome() {
         </div>
       </div>
 
-      {/* Create College Modal */}
-      <Modal
-        show={showCreateModal}
-        onClose={() => !isLoading && setShowCreateModal(false)}
-        size="lg"
-      >
-        <ModalHeader>Add New College</ModalHeader>
-        <ModalBody>
-          <div className="space-y-6">
-            <div>
-              <Label htmlFor="collegeName">
-                College Name <abbr className="text-red-600">*</abbr>
-              </Label>
-              <TextInput
-                id="collegeName"
-                placeholder="e.g., University of Example"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                disabled={isLoading}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="abbreviation">Abbreviation</Label>
-              <TextInput
-                id="abbreviation"
-                placeholder="e.g., UOE"
-                value={formData.abbreviation}
-                onChange={(e) =>
-                  handleInputChange("abbreviation", e.target.value)
-                }
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="location">Location</Label>
-              <TextInput
-                id="location"
-                placeholder="e.g., Example City, State"
-                value={formData.location}
-                onChange={(e) => handleInputChange("location", e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="website">Website</Label>
-              <TextInput
-                id="website"
-                type="url"
-                placeholder="e.g., https://www.example.edu"
-                value={formData.website}
-                onChange={(e) => handleInputChange("website", e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="gpa">Current Overall GPA</Label>
-              <TextInput
-                id="gpa"
-                type="number"
-                step="0.01"
-                min="0"
-                max="4"
-                placeholder="e.g., 3.75"
-                value={formData.overallGPA || ""}
-                onChange={(e) =>
-                  handleInputChange(
-                    "overallGPA",
-                    e.target.value ? parseFloat(e.target.value) : "",
-                  )
-                }
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            onClick={handleCreateCollege}
-            disabled={isLoading || !formData.name.trim()}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {isLoading ? (
-              <>
-                <Spinner
-                  size="sm"
-                  aria-label="Loading..."
-                  className="me-3"
-                  light
-                />
-                Loading...
-              </>
-            ) : (
-              <>Create College</>
-            )}
-          </Button>
-          <Button
-            color="gray"
-            onClick={() => setShowCreateModal(false)}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-        </ModalFooter>
-      </Modal>
+      <CollegeFormModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateCollege}
+        isLoading={isLoading}
+      />
     </main>
   );
 }

@@ -3,13 +3,6 @@
 import {
   Button,
   Card,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Label,
-  TextInput,
-  Select,
   Badge,
   Spinner,
   Breadcrumb,
@@ -29,15 +22,13 @@ import {
   HiClipboardList,
   HiPencil,
   HiTrash,
-  HiCheck,
   HiX,
 } from "react-icons/hi";
 import {
   College,
   Semester,
-  SemesterType,
-  SemesterStatus,
   CreateSemesterData,
+  SemesterStatus,
 } from "@/types/app/app";
 import {
   getCollegeById,
@@ -46,23 +37,11 @@ import {
   deleteSemester,
 } from "@/lib/storage";
 import { successToast, errorToast } from "@/lib/notifications";
+import { SemesterFormModal } from "@/components/modals";
 
 interface CollegeDetailPageProps {
   collegeId: string;
 }
-
-const semesterTypeOptions = [
-  { value: SemesterType.FALL, label: "Fall" },
-  { value: SemesterType.SPRING, label: "Spring" },
-  { value: SemesterType.SUMMER, label: "Summer" },
-  { value: SemesterType.WINTER, label: "Winter" },
-];
-
-const semesterStatusOptions = [
-  { value: SemesterStatus.UPCOMING, label: "Upcoming" },
-  { value: SemesterStatus.CURRENT, label: "Current" },
-  { value: SemesterStatus.COMPLETED, label: "Completed" },
-];
 
 export default function CollegeDetailPage({
   collegeId,
@@ -74,17 +53,6 @@ export default function CollegeDetailPage({
   const [editingSemester, setEditingSemester] = useState<Semester | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
-  const [formData, setFormData] = useState<CreateSemesterData>({
-    name: "",
-    type: SemesterType.FALL,
-    year: new Date().getFullYear(),
-    status: SemesterStatus.UPCOMING,
-    startDate: new Date(),
-    endDate: new Date(),
-    collegeId: collegeId,
-    gpa: undefined,
-    targetGPA: undefined,
-  });
 
   useEffect(() => {
     loadCollege();
@@ -108,42 +76,7 @@ export default function CollegeDetailPage({
     }
   };
 
-  const handleInputChange = (
-    field: keyof CreateSemesterData,
-    value: string | number | Date | SemesterType | SemesterStatus,
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const resetForm = () => {
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth();
-
-    // Auto-suggest semester type based on current month
-    let suggestedType = SemesterType.FALL;
-    if (currentMonth >= 0 && currentMonth <= 4) {
-      suggestedType = SemesterType.SPRING;
-    } else if (currentMonth >= 5 && currentMonth <= 7) {
-      suggestedType = SemesterType.SUMMER;
-    }
-
-    setFormData({
-      name: "",
-      type: suggestedType,
-      year: currentYear,
-      status: SemesterStatus.UPCOMING,
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000), // 120 days from now
-      collegeId: collegeId,
-      gpa: undefined,
-      targetGPA: undefined,
-    });
-  };
-
-  const handleCreateSemester = async () => {
+  const handleCreateSemester = async (formData: CreateSemesterData) => {
     if (!formData.name.trim()) {
       errorToast({ message: "Semester name is required" });
       return;
@@ -157,9 +90,8 @@ export default function CollegeDetailPage({
     setIsLoading(true);
     try {
       const newSemester = await createSemester(collegeId, formData);
-      await loadCollege(); // Refresh the college data
+      await loadCollege();
       setShowCreateModal(false);
-      resetForm();
       successToast({
         message: `${newSemester.name} has been created successfully!`,
       });
@@ -173,21 +105,10 @@ export default function CollegeDetailPage({
 
   const handleEditSemester = (semester: Semester) => {
     setEditingSemester(semester);
-    setFormData({
-      name: semester.name,
-      type: semester.type,
-      year: semester.year,
-      status: semester.status,
-      startDate: semester.startDate,
-      endDate: semester.endDate,
-      collegeId: semester.collegeId,
-      gpa: semester.gpa,
-      targetGPA: semester.targetGPA,
-    });
     setShowEditModal(true);
   };
 
-  const handleUpdateSemester = async () => {
+  const handleUpdateSemester = async (formData: CreateSemesterData) => {
     if (!editingSemester) return;
 
     if (!formData.name.trim()) {
@@ -208,7 +129,7 @@ export default function CollegeDetailPage({
         formData,
       );
       if (success) {
-        await loadCollege(); // Refresh the college data
+        await loadCollege();
         setShowEditModal(false);
         setEditingSemester(null);
         successToast({
@@ -236,7 +157,7 @@ export default function CollegeDetailPage({
 
     try {
       await deleteSemester(collegeId, semester.id);
-      await loadCollege(); // Refresh the college data
+      await loadCollege();
       successToast({
         message: `${semester.name} has been deleted successfully!`,
       });
@@ -259,12 +180,15 @@ export default function CollegeDetailPage({
     }
   };
 
-  const closeModal = () => {
+  const closeCreateModal = () => {
     if (isLoading) return;
     setShowCreateModal(false);
+  };
+
+  const closeEditModal = () => {
+    if (isLoading) return;
     setShowEditModal(false);
     setEditingSemester(null);
-    resetForm();
   };
 
   if (pageLoading) {
@@ -297,7 +221,6 @@ export default function CollegeDetailPage({
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
       <div className="border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="py-6">
@@ -347,10 +270,7 @@ export default function CollegeDetailPage({
                 </div>
               </div>
               <Button
-                onClick={() => {
-                  resetForm();
-                  setShowCreateModal(true);
-                }}
+                onClick={() => setShowCreateModal(true)}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 <HiPlus className="mr-2 h-4 w-4" />
@@ -362,7 +282,6 @@ export default function CollegeDetailPage({
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* College Stats */}
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
           <Card className="text-center">
             <div className="flex flex-col items-center">
@@ -432,7 +351,6 @@ export default function CollegeDetailPage({
           </Card>
         </div>
 
-        {/* Semesters Section */}
         <div>
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -440,10 +358,7 @@ export default function CollegeDetailPage({
             </h3>
             {college.semesters.length > 0 && (
               <Button
-                onClick={() => {
-                  resetForm();
-                  setShowCreateModal(true);
-                }}
+                onClick={() => setShowCreateModal(true)}
                 size="sm"
                 outline
               >
@@ -466,10 +381,7 @@ export default function CollegeDetailPage({
                   each semester.
                 </p>
                 <Button
-                  onClick={() => {
-                    resetForm();
-                    setShowCreateModal(true);
-                  }}
+                  onClick={() => setShowCreateModal(true)}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   <HiPlus className="mr-2 h-4 w-4" />
@@ -481,13 +393,12 @@ export default function CollegeDetailPage({
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {college.semesters
                 .sort((a, b) => {
-                  // Sort by year descending, then by semester type
                   if (a.year !== b.year) return b.year - a.year;
                   const typeOrder = {
-                    [SemesterType.SPRING]: 1,
-                    [SemesterType.SUMMER]: 2,
-                    [SemesterType.FALL]: 3,
-                    [SemesterType.WINTER]: 4,
+                    spring: 1,
+                    summer: 2,
+                    fall: 3,
+                    winter: 4,
                   };
                   return typeOrder[b.type] - typeOrder[a.type];
                 })
@@ -584,192 +495,22 @@ export default function CollegeDetailPage({
         </div>
       </div>
 
-      {/* Create/Edit Semester Modal */}
-      <Modal
-        show={showCreateModal || showEditModal}
-        onClose={closeModal}
-        size="lg"
-      >
-        <ModalHeader>
-          {showEditModal ? "Edit Semester" : "Add New Semester"}
-        </ModalHeader>
-        <ModalBody>
-          <div className="space-y-6">
-            <div>
-              <Label htmlFor="semesterName">
-                Semester Name <abbr className="text-red-600">*</abbr>
-              </Label>
-              <TextInput
-                id="semesterName"
-                placeholder="e.g., Fall 2024"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                disabled={isLoading}
-                required
-              />
-            </div>
+      <SemesterFormModal
+        isOpen={showCreateModal}
+        onClose={closeCreateModal}
+        onSubmit={handleCreateSemester}
+        collegeId={collegeId}
+        isLoading={isLoading}
+      />
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="semesterType">Semester Type</Label>
-                <Select
-                  id="semesterType"
-                  value={formData.type}
-                  onChange={(e) =>
-                    handleInputChange("type", e.target.value as SemesterType)
-                  }
-                  disabled={isLoading}
-                >
-                  {semesterTypeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="year">Year</Label>
-                <TextInput
-                  id="year"
-                  type="number"
-                  min="2000"
-                  max="2100"
-                  value={formData.year}
-                  onChange={(e) =>
-                    handleInputChange("year", parseInt(e.target.value))
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select
-                id="status"
-                value={formData.status}
-                onChange={(e) =>
-                  handleInputChange("status", e.target.value as SemesterStatus)
-                }
-                disabled={isLoading}
-              >
-                {semesterStatusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
-                <TextInput
-                  id="startDate"
-                  type="date"
-                  value={
-                    formData.startDate instanceof Date
-                      ? formData.startDate.toISOString().split("T")[0]
-                      : ""
-                  }
-                  onChange={(e) =>
-                    handleInputChange("startDate", new Date(e.target.value))
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="endDate">End Date</Label>
-                <TextInput
-                  id="endDate"
-                  type="date"
-                  value={
-                    formData.endDate instanceof Date
-                      ? formData.endDate.toISOString().split("T")[0]
-                      : ""
-                  }
-                  onChange={(e) =>
-                    handleInputChange("endDate", new Date(e.target.value))
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="gpa">Current GPA</Label>
-                <TextInput
-                  id="gpa"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="4"
-                  placeholder="e.g., 3.75"
-                  value={formData.gpa || ""}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "gpa",
-                      e.target.value ? parseFloat(e.target.value) : "",
-                    )
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="targetGPA">Target GPA</Label>
-                <TextInput
-                  id="targetGPA"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="4"
-                  placeholder="e.g., 3.8"
-                  value={formData.targetGPA || ""}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "targetGPA",
-                      e.target.value ? parseFloat(e.target.value) : "",
-                    )
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            onClick={
-              showEditModal ? handleUpdateSemester : handleCreateSemester
-            }
-            disabled={isLoading || !formData.name.trim()}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {isLoading ? (
-              <>
-                <Spinner
-                  size="sm"
-                  aria-label="Loading..."
-                  className="me-3"
-                  light
-                />
-                Loading...
-              </>
-            ) : showEditModal ? (
-              "Update Semester"
-            ) : (
-              "Create Semester"
-            )}
-          </Button>
-          <Button color="gray" onClick={closeModal} disabled={isLoading}>
-            Cancel
-          </Button>
-        </ModalFooter>
-      </Modal>
+      <SemesterFormModal
+        isOpen={showEditModal}
+        onClose={closeEditModal}
+        onSubmit={handleUpdateSemester}
+        editingSemester={editingSemester}
+        collegeId={collegeId}
+        isLoading={isLoading}
+      />
     </main>
   );
 }

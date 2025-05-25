@@ -1,15 +1,16 @@
 "use client";
 
+import { customTheme } from "@/app/theme";
+import { ThemeProvider } from "flowbite-react";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
-interface ToastProviderProps {
+export default function LayoutWrapper({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-export default function ToastProvider({ children }: ToastProviderProps) {
+}) {
   return (
-    <>
+    <ThemeProvider theme={customTheme}>
       {children}
       <ToastContainer
         closeButton={false}
@@ -22,6 +23,6 @@ export default function ToastProvider({ children }: ToastProviderProps) {
           "shadow-md rounded-lg text-gray-500 bg-white dark:text-gray-400 dark:bg-gray-800 p-0"
         }
       />
-    </>
+    </ThemeProvider>
   );
 }

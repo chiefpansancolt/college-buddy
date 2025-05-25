@@ -9,12 +9,12 @@ import {
   ModalHeader,
   Label,
   TextInput,
-  Select,
   DarkThemeToggle,
   Badge,
   Spinner,
 } from "flowbite-react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   HiPlus,
   HiAcademicCap,
@@ -25,12 +25,14 @@ import {
   HiUsers,
   HiLocationMarker,
   HiGlobeAlt,
+  HiArrowRight,
 } from "react-icons/hi";
 import { College, CreateCollegeData } from "@/types/app/app";
 import { getColleges, createCollege } from "@/lib/storage";
 import { successToast, errorToast } from "@/lib/notifications";
 
 export default function CollegeBuddyHome() {
+  const router = useRouter();
   const [colleges, setColleges] = useState<College[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,6 +94,10 @@ export default function CollegeBuddyHome() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const navigateToCollege = (collegeId: string) => {
+    router.push(`/college/${collegeId}`);
   };
 
   const featuresData = [
@@ -301,7 +307,8 @@ export default function CollegeBuddyHome() {
               {colleges.map((college) => (
                 <Card
                   key={college.id}
-                  className="transition-shadow hover:shadow-lg"
+                  className="cursor-pointer transition-shadow hover:shadow-lg"
+                  onClick={() => navigateToCollege(college.id)}
                 >
                   <div className="mb-4 flex items-start justify-between">
                     <div>
@@ -314,6 +321,7 @@ export default function CollegeBuddyHome() {
                         </Badge>
                       )}
                     </div>
+                    <HiArrowRight className="h-5 w-5 text-gray-400" />
                   </div>
 
                   <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
@@ -331,6 +339,7 @@ export default function CollegeBuddyHome() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           Visit Website
                         </a>
@@ -348,6 +357,21 @@ export default function CollegeBuddyHome() {
                         </Badge>
                       </div>
                     )}
+                  </div>
+
+                  <div className="mt-4">
+                    <Button
+                      size="sm"
+                      outline
+                      className="w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigateToCollege(college.id);
+                      }}
+                    >
+                      Manage Semesters
+                      <HiArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
                   </div>
                 </Card>
               ))}
@@ -367,7 +391,7 @@ export default function CollegeBuddyHome() {
           <div className="space-y-6">
             <div>
               <Label htmlFor="collegeName">
-                College Name <abbr className="color-red-600">*</abbr>
+                College Name <abbr className="text-red-600">*</abbr>
               </Label>
               <TextInput
                 id="collegeName"

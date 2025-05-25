@@ -31,6 +31,29 @@ export enum Priority {
   URGENT = "urgent",
 }
 
+export enum ScheduleType {
+  LECTURE = "lecture",
+  LAB = "lab",
+  DISCUSSION = "discussion",
+  SEMINAR = "seminar",
+  TUTORIAL = "tutorial",
+  WORKSHOP = "workshop",
+  EXAM = "exam",
+  OTHER = "other",
+}
+
+export interface ClassSchedule {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  building?: string;
+  room?: string;
+  type: ScheduleType; // New field to distinguish schedule types
+  instructor?: string; // Lab instructors might be different from lecture instructors
+  notes?: string; // Additional notes for specific schedule types
+}
+
 export interface Assignment extends BaseEntity {
   title: string;
   description?: string;
